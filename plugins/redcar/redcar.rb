@@ -85,6 +85,7 @@ module Redcar
         tab = win.new_tab(Redcar::EditTab)
         tab.title = "untitled"
         tab.focus
+        EditView::InfoSpeedbarCommand.new.run
         tab
       end
     end
@@ -410,6 +411,21 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
+    class MoveNextLineCommand < EditTabCommand
+
+      def execute
+        doc = tab.edit_view.document
+        line_ix = doc.line_at_offset(doc.cursor_offset)
+        if line_ix == doc.line_count - 1
+          doc.cursor_offset = doc.length
+        else
+          doc.cursor_offset = doc.offset_at_line(line_ix + 1) - doc.delim.length
+        end
+        doc.ensure_visible(doc.cursor_offset)
+        doc.insert(doc.cursor_offset, "\n")
+      end
+    end
+
     class MoveBottomCommand < EditTabCommand
 
       def execute
@@ -732,6 +748,8 @@ Redcar.environment: #{Redcar.environment}
         link "Cmd+W",       CloseTabCommand
         link "Cmd+Shift+W", CloseWindowCommand
         link "Cmd+Q",       QuitCommand
+        
+        link "Cmd+Enter",   MoveNextLineCommand
 
         link "Cmd+Shift+E", EditView::InfoSpeedbarCommand
         link "Cmd+Z",       UndoCommand
@@ -911,6 +929,7 @@ Redcar.environment: #{Redcar.environment}
             item "Home",    MoveHomeCommand
             item "End",     MoveEndCommand
             item "Bottom",  MoveBottomCommand
+            item "Go To Next Line", MoveNextLineCommand
           end
 
           group(:priority => 60) do
