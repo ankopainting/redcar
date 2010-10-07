@@ -256,6 +256,7 @@ module Redcar
           current = ancestor_node.children
         end
         tree.select(ancestor_node)
+        project.window.treebook.focus_tree(project.tree)
       end
     end
 
@@ -304,7 +305,7 @@ module Redcar
         when :osx
           run_application('open', '-a', 'finder', path)
         when :windows
-          run_application('explorer.exe', path)
+          run_application('explorer.exe', path.gsub("/","\\"))
         when :linux
           app = {
             'Thunar' => [path],
@@ -336,7 +337,7 @@ module Redcar
         when :osx
           run_application('open', path)
         when :windows
-          run_application('cmd.exe', '/k', 'cd ' + path)
+          run_application('start cmd.exe', '/kcd ' + path.gsub("/","\\"))
         when :linux
           app = {
             'xfce4-terminal' => ["--working-directory=#{path}"],

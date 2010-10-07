@@ -68,48 +68,19 @@ module Redcar
         MESSAGE_BOX_BUTTON_COMBOS.keys
       end
       
-      class PasswordDialog < JFace::Dialogs::Dialog
-        def initialize(parent_shell, title, message)
-          super(parent_shell)
-          @title, @message = title, message
-        end
-        
-        def createDialogArea(parent)
-          composite = super(parent)
-          
-          passwordLabel = Swt::Widgets::Label.new(composite, Swt::SWT::RIGHT)
-          passwordLabel.setText(@message)
-          
-          @passwordField = Swt::Widgets::Text.new(composite, Swt::SWT::SINGLE | Swt::SWT::PASSWORD)
-          data = Swt::Layout::GridData.new(Swt::Layout::GridData::FILL_HORIZONTAL)
-          @passwordField.setLayoutData(data)
-          
-          getShell.setText(@title)
-        end
-        
-        def value
-          @password
-        end
-        
-        def close
-          @password = @passwordField.getText
-          super
-        end
-      end
-      
       def input(title, message, initial_value, &block)
-        dialog = JFace::Dialogs::InputDialog.new(
+        dialog = Dialogs::InputDialog.new(
                    parent_shell,
-                   title, message, initial_value) do |text|
+                   title, message, :initial_text => initial_value) do |text|
           block ? block[text] : nil
         end
         code = dialog.open
         button = (code == 0 ? :ok : :cancel)
-        {:button => button, :value => dialog.getValue}
+        {:button => button, :value => dialog.value}
       end
       
       def password_input(title, message)
-        dialog = PasswordDialog.new(parent_shell, title, message)
+        dialog = Dialogs::InputDialog.new(parent_shell, title, message, :password => true)
         code = dialog.open
         button = (code == 0 ? :ok : :cancel)
         {:button => button, :value => dialog.value}
@@ -152,7 +123,10 @@ module Redcar
       
       def file_dialog(type, options)
         dialog = Swt::Widgets::FileDialog.new(parent_shell, type)
+        dialog.setText("Save File");
         if options[:filter_path]
+	  dialog.setText("Save File As") if type == Swt::SWT::SAVE
+	  dialog.setText("Open File") if type == Swt::SWT::OPEN
           dialog.set_filter_path(options[:filter_path])
         end
         Redcar.app.protect_application_focus do
@@ -162,6 +136,7 @@ module Redcar
       
       def directory_dialog(options)
         dialog = Swt::Widgets::DirectoryDialog.new(parent_shell)
+	dialog.setText("Open Directory")
         if options[:filter_path]
           dialog.set_filter_path(options[:filter_path])
         end

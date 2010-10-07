@@ -365,10 +365,9 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class MoveHomeCommand < EditTabCommand
+    class MoveHomeCommand < DocumentCommand
 
       def execute
-        doc     = tab.edit_view.document
         line_ix = doc.line_at_offset(doc.cursor_offset)
         line    = doc.get_line(line_ix)
         prefix  = line[0...doc.cursor_line_offset]
@@ -388,19 +387,17 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class MoveTopCommand < EditTabCommand
+    class MoveTopCommand < DocumentCommand
 
       def execute
-        doc = tab.edit_view.document
         doc.cursor_offset = 0
         doc.ensure_visible(0)
       end
     end
 
-    class MoveEndCommand < EditTabCommand
+    class MoveEndCommand < DocumentCommand
 
       def execute
-        doc = tab.edit_view.document
         line_ix = doc.line_at_offset(doc.cursor_offset)
         if line_ix == doc.line_count - 1
           doc.cursor_offset = doc.length
@@ -412,7 +409,6 @@ Redcar.environment: #{Redcar.environment}
     end
 
     class MoveNextLineCommand < EditTabCommand
-
       def execute
         doc = tab.edit_view.document
         line_ix = doc.line_at_offset(doc.cursor_offset)
@@ -426,18 +422,15 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class MoveBottomCommand < EditTabCommand
-
+    class MoveBottomCommand < DocumentCommand
       def execute
-        doc = tab.edit_view.document
         doc.cursor_offset = doc.length
         doc.ensure_visible(doc.length)
       end
     end
 
-    class ChangeIndentCommand < EditTabCommand
+    class ChangeIndentCommand < DocumentCommand
       def execute
-        doc = tab.edit_view.document
         doc.compound do
           doc.edit_view.delay_parsing do
             if doc.selection?
@@ -503,14 +496,14 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class SelectAllCommand < Redcar::EditTabCommand
+    class SelectAllCommand < Redcar::DocumentCommand
 
       def execute
         doc.select_all
       end
     end
 
-    class SelectLineCommand < Redcar::EditTabCommand
+    class SelectLineCommand < Redcar::DocumentCommand
 
       def execute
         doc.set_selection_range(
@@ -518,7 +511,7 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class SelectWordCommand < Redcar::EditTabCommand
+    class SelectWordCommand < Redcar::DocumentCommand
 
       def execute
         range = doc.current_word_range
@@ -621,6 +614,22 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
+    class SortLinesCommand < Redcar::DocumentCommand
+
+      def execute
+        doc = tab.edit_view.document
+        cursor_ix = doc.cursor_offset
+        if doc.selection?
+          start_ix = doc.selection_range.begin
+          text = doc.selected_text                              
+    
+          sorted_text = text.split("\n").sort().join("\n")
+          doc.replace_selection(sorted_text)
+          doc.cursor_offset = cursor_ix
+        end
+      end
+    end
+    
     class DialogExample < Redcar::Command
       def execute
       	builder = Menu::Builder.new do
@@ -667,10 +676,12 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class ToggleBlockSelectionCommand < Redcar::EditTabCommand
+    class ToggleBlockSelectionCommand < Redcar::DocumentCommand
 
       def execute
-        doc.block_selection_mode = !doc.block_selection_mode?
+        unless doc.single_line?
+          doc.block_selection_mode = !doc.block_selection_mode?
+        end
       end
     end
 
@@ -696,9 +707,11 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class ToggleAnnotations < Redcar::EditTabCommand
+    class ToggleToolbar < Command
+
       def execute
-        EditView.show_annotations = !EditView.show_annotations?
+        Redcar.app.toggle_show_toolbar
+        Redcar.app.refresh_toolbar!
       end
     end
 
@@ -783,6 +796,7 @@ Redcar.environment: #{Redcar.environment}
         link "Ctrl+Alt+U",   EditView::TitlizeTextCommand
         link "Ctrl+G",       EditView::OppositeCaseTextCommand
         link "Ctrl+_",       EditView::CamelSnakePascalRotateTextCommand
+        link "Ctrl+=",       EditView::AlignAssignmentCommand
 
         link "Cmd+T",           Project::FindFileCommand
         link "Cmd+Shift+Alt+O", MoveTabToOtherNotebookCommand
@@ -854,6 +868,7 @@ Redcar.environment: #{Redcar.environment}
         link "Ctrl+Alt+U",   EditView::TitlizeTextCommand
         link "Ctrl+G",       EditView::OppositeCaseTextCommand
         link "Ctrl+_",       EditView::CamelSnakePascalRotateTextCommand
+        link "Ctrl+=",       EditView::AlignAssignmentCommand
 
         link "Ctrl+T",           Project::FindFileCommand
         link "Ctrl+Shift+Alt+O", MoveTabToOtherNotebookCommand
@@ -883,6 +898,21 @@ Redcar.environment: #{Redcar.environment}
       end
 
       [linwin, osx]
+    end
+
+    def self.toolbars
+      ToolBar::Builder.build do
+        item "New File", :command => NewCommand, :icon => :new, :barname => :core
+        item "Open File", :command => Project::FileOpenCommand, :icon => :open, :barname => :core
+        item "Open Directory", :command => Project::DirectoryOpenCommand, :icon => :open_dir, :barname => :core
+        item "Save File", :command => Project::FileSaveCommand, :icon => :save, :barname => :core
+        item "Save File As", :command => Project::FileSaveAsCommand, :icon => :save_as, :barname => :core
+        item "Undo", :command => UndoCommand, :icon => :undo, :barname => :core
+        item "Redo", :command => RedoCommand, :icon => :redo, :barname => :core
+        item "New Notebook", :command => NewNotebookCommand, :icon => File.join(Redcar::ICONS_DIRECTORY, "book--plus.png"), :barname => :edit
+        item "Close Notebook", :command => CloseNotebookCommand, :icon => File.join(Redcar::ICONS_DIRECTORY, "book--minus.png"), :barname => :edit
+      end
+
     end
 
     def self.menus
@@ -920,6 +950,7 @@ Redcar.environment: #{Redcar.environment}
             item "Cut", CutCommand
             item "Copy", CopyCommand
             item "Paste", PasteCommand
+<<<<<<< HEAD
             item "Duplicate Region", DuplicateCommand
           end
 
@@ -941,17 +972,41 @@ Redcar.environment: #{Redcar.environment}
           group(:priority => 70) do
             separator
             item "Goto Line", GotoLineCommand
+=======
+            sub_menu "Line Tools", :priority => 20 do
+              item "Duplicate Region", DuplicateCommand
+              item "Sort Lines in Region", SortLinesCommand
+            end
+>>>>>>> upstream/master
           end
 
-          group(:priority => 80) do
+          group(:priority => 30) do
             separator
-            sub_menu "Select" do
+            sub_menu "Selection" do
               item "All", SelectAllCommand
               item "Line", SelectLineCommand
               item "Current Word", SelectWordCommand
+              item "Toggle Block Selection", ToggleBlockSelectionCommand
             end
-            item "Toggle Block Selection", ToggleBlockSelectionCommand
           end
+          
+          group(:priority => 40) do
+            sub_menu "Document Navigation" do
+              item "Goto Line", GotoLineCommand
+              item "Top",     MoveTopCommand
+              item "Home",    MoveHomeCommand
+              item "End",     MoveEndCommand
+              item "Bottom",  MoveBottomCommand
+            end
+          end
+
+          group(:priority => 50) do
+            sub_menu "Formatting" do
+              item "Increase Indent", IncreaseIndentCommand
+              item "Decrease Indent", DecreaseIndentCommand
+            end
+          end
+
         end
         sub_menu "Debug", :priority => 20 do
           group(:priority => 10) do
@@ -984,9 +1039,9 @@ Redcar.environment: #{Redcar.environment}
              end
           end
           separator
+          item "Show Toolbar", :command => ToggleToolbar, :type => :check, :active => Redcar.app.show_toolbar?
           item "Show Invisibles", :command => ToggleInvisibles, :type => :check, :active => EditView.show_invisibles?
           item "Show Line Numbers", :command => ToggleLineNumbers, :type => :check, :active => EditView.show_line_numbers?
-          item "Show Annotations", :command => ToggleAnnotations, :type => :check, :active => EditView.show_annotations?
         end
         sub_menu "Bundles", :priority => 45 do
           group(:priority => :first) do

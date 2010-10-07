@@ -14,6 +14,10 @@ module Swt
     import org.eclipse.swt.widgets.Menu
     import org.eclipse.swt.widgets.MenuItem
     import org.eclipse.swt.widgets.MessageBox
+    import org.eclipse.swt.widgets.ToolBar
+    import org.eclipse.swt.widgets.ToolItem
+    import org.eclipse.swt.widgets.CoolBar
+    import org.eclipse.swt.widgets.CoolItem
     import org.eclipse.swt.widgets.Sash
     import org.eclipse.swt.widgets.TabFolder
     import org.eclipse.swt.widgets.TabItem
@@ -67,10 +71,12 @@ module Swt
     import org.eclipse.swt.graphics.Font
     import org.eclipse.swt.graphics.GC
     import org.eclipse.swt.graphics.Point
+    import org.eclipse.swt.graphics.RGB
   end
   
   module Events
     import org.eclipse.swt.events.KeyEvent
+    import org.eclipse.swt.events.MouseListener
   end
   
   import org.eclipse.swt.browser.Browser
