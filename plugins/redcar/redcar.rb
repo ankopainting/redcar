@@ -82,7 +82,12 @@ module Redcar
     class NewCommand < Command
 
       def execute
-        tab = win.new_tab(Redcar::EditTab)
+        unless win.nil?
+          tab = win.new_tab(Redcar::EditTab)
+        else
+          window = Redcar.app.new_window
+          tab = window.new_tab(Redcar::EditTab)          
+        end
         tab.title = "untitled"
         tab.focus
         EditView::InfoSpeedbarCommand.new.run
@@ -408,17 +413,18 @@ Redcar.environment: #{Redcar.environment}
       end
     end
 
-    class MoveNextLineCommand < EditTabCommand
+    class MoveNextLineCommand < DocumentCommand
       def execute
         doc = tab.edit_view.document
         line_ix = doc.line_at_offset(doc.cursor_offset)
         if line_ix == doc.line_count - 1
           doc.cursor_offset = doc.length
         else
-          doc.cursor_offset = doc.offset_at_line(line_ix + 1) - doc.delim.length
+          doc.cursor_offset = doc.offset_at_line_end(line_ix)
         end
         doc.ensure_visible(doc.cursor_offset)
         doc.insert(doc.cursor_offset, "\n")
+        
       end
     end
 
@@ -762,7 +768,7 @@ Redcar.environment: #{Redcar.environment}
         link "Cmd+Shift+W", CloseWindowCommand
         link "Cmd+Q",       QuitCommand
         
-        link "Cmd+Enter",   MoveNextLineCommand
+        #link "Cmd+Return",   MoveNextLineCommand
 
         link "Cmd+Shift+E", EditView::InfoSpeedbarCommand
         link "Cmd+Z",       UndoCommand
@@ -788,7 +794,7 @@ Redcar.environment: #{Redcar.environment}
         link "Cmd+A",       SelectAllCommand
         link "Ctrl+W",      SelectWordCommand
         link "Cmd+B",       ToggleBlockSelectionCommand
-        #link "Escape", AutoCompleter::AutoCompleteCommand
+        link "Escape", AutoCompleter::AutoCompleteCommand
         link "Ctrl+Escape",  AutoCompleter::MenuAutoCompleterCommand
 
         link "Ctrl+U",       EditView::UpcaseTextCommand
