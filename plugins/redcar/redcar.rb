@@ -950,8 +950,10 @@ Redcar.environment: #{Redcar.environment}
             item "Cut", CutCommand
             item "Copy", CopyCommand
             item "Paste", PasteCommand
-<<<<<<< HEAD
-            item "Duplicate Region", DuplicateCommand
+            sub_menu "Line Tools", :priority => 20 do
+              item "Duplicate Region", DuplicateCommand
+              item "Sort Lines in Region", SortLinesCommand
+            end
           end
 
           group(:priority => 25) do
@@ -972,12 +974,6 @@ Redcar.environment: #{Redcar.environment}
           group(:priority => 70) do
             separator
             item "Goto Line", GotoLineCommand
-=======
-            sub_menu "Line Tools", :priority => 20 do
-              item "Duplicate Region", DuplicateCommand
-              item "Sort Lines in Region", SortLinesCommand
-            end
->>>>>>> upstream/master
           end
 
           group(:priority => 30) do
