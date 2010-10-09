@@ -90,7 +90,6 @@ module Redcar
         end
         tab.title = "untitled"
         tab.focus
-        EditView::InfoSpeedbarCommand.new.run
         tab
       end
     end
@@ -842,6 +841,8 @@ Redcar.environment: #{Redcar.environment}
         link "Ctrl+W",       CloseTabCommand
         link "Ctrl+Shift+W", CloseWindowCommand
         link "Ctrl+Q",       QuitCommand
+        
+        link "Ctrl+Enter",   MoveNextLineCommand
 
         link "Ctrl+Shift+E", EditView::InfoSpeedbarCommand
         link "Ctrl+Z",       UndoCommand
