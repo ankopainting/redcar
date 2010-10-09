@@ -963,26 +963,6 @@ Redcar.environment: #{Redcar.environment}
             end
           end
 
-          group(:priority => 25) do
-            separator
-            item "Top",     MoveTopCommand
-            item "Home",    MoveHomeCommand
-            item "End",     MoveEndCommand
-            item "Bottom",  MoveBottomCommand
-            item "Go To Next Line", MoveNextLineCommand
-          end
-
-          group(:priority => 60) do
-            separator
-            item "Increase Indent", IncreaseIndentCommand
-            item "Decrease Indent", DecreaseIndentCommand
-          end
-
-          group(:priority => 70) do
-            separator
-            item "Goto Line", GotoLineCommand
-          end
-
           group(:priority => 30) do
             separator
             sub_menu "Selection" do
