@@ -93,9 +93,7 @@ module Redcar
       end
       
       def find_by_scope_and_tab_trigger(current_scope, tab_trigger)
-        debug = (ranked_matching(current_scope, tab_trigger) + global_with_tab(tab_trigger)).uniq
-        debug.each {|x| puts x.class;p x.hash;p x.name; p x.tab_trigger; p x.scope; p x.uuid}
-        debug
+        (ranked_matching(current_scope, tab_trigger) + global_with_tab(tab_trigger)).uniq
       end
     end
     
