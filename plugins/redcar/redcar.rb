@@ -419,7 +419,7 @@ Redcar.environment: #{Redcar.environment}
         if line_ix == doc.line_count - 1
           doc.cursor_offset = doc.length
         else
-          doc.cursor_offset = doc.offset_at_line_end(line_ix)
+          doc.cursor_offset = doc.offset_at_line(line_ix + 1) - doc.delim.length
         end
         doc.ensure_visible(doc.cursor_offset)
         doc.insert(doc.cursor_offset, "\n")
