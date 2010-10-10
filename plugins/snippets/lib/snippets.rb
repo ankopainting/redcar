@@ -36,33 +36,49 @@ module Redcar
       attr_reader :snippets
     
       def initialize
-        @snippets = []
+        # @snippets contains a hash of arrays of snippets.
+        # The key is the tab_trigger
+        @snippets = Hash.new do |h,k|
+          h[k] = []
+        end
       end
       
       def add(s)
         if s.is_a?(Array)
-          @snippets += s
+          s.each do |snippet|
+            @snippets[snippet.tab_trigger] << snippet            
+          end
         else
-          @snippets << s
+          @snippets[s.tab_trigger] << s
         end
         @global = nil
       end
       
       def remove(s)
-        @snippets.delete(s)
+        @snippets[s.tab_trigger].delete(s)
         @global = nil
       end
       
+      # returns hash of arrays of snippets, indexed by tab_trigger
       def global
-        @global ||= @snippets.select {|s| [nil, ""].include?(s.scope) }
+        if @global.nil?
+          newhash = {}
+          @snippets.each_pair do |key, value|
+            newvalue = value.select {|s| [nil, ""].include?(s.scope) }
+            newhash[key] = newvalue if newvalue.size > 0
+          end
+          @global = newhash
+        end
+        @global
       end
       
+      #returns array
       def global_with_tab(tab_trigger)
-        global.select {|s| s.tab_trigger == tab_trigger}
+        global[tab_trigger] or []
       end
       
       def ranked_matching(current_scope, tab_trigger)
-        matches_tab = @snippets.select {|s| s.tab_trigger == tab_trigger}
+        matches_tab = @snippets[tab_trigger]
         matches = matches_tab.map do |snippet|
           next unless snippet.scope
           if match = JavaMateView::ScopeMatcher.get_match(snippet.scope, current_scope)
