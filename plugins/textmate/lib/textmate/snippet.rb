@@ -14,6 +14,14 @@ module Redcar
         end
       end
       
+      def eql?(obj2)
+        obj2.uuid == uuid
+      end
+      
+      def hash
+        uuid
+      end
+      
       def name
         @plist["name"]
       end

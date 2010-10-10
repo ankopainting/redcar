@@ -59,20 +59,22 @@ module Redcar
         @global = nil
       end
       
+      # returns hash of arrays of snippets, indexed by tab_trigger
       def global
         if @global.nil?
           newhash = {}
           @snippets.each_pair do |key, value|
             newvalue = value.select {|s| [nil, ""].include?(s.scope) }
-            newhash[key] = newvalue if newvalue.count > 0
+            newhash[key] = newvalue if newvalue.size > 0
           end
           @global = newhash
         end
         @global
       end
       
+      #returns array
       def global_with_tab(tab_trigger)
-        [nil, global[tab_trigger] ]
+        global[tab_trigger] or []
       end
       
       def ranked_matching(current_scope, tab_trigger)
@@ -91,7 +93,9 @@ module Redcar
       end
       
       def find_by_scope_and_tab_trigger(current_scope, tab_trigger)
-        (ranked_matching(current_scope, tab_trigger) + global_with_tab(tab_trigger)).uniq
+        debug = (ranked_matching(current_scope, tab_trigger) + global_with_tab(tab_trigger)).uniq
+        debug.each {|x| puts x.class;p x.hash;p x.name; p x.tab_trigger; p x.scope; p x.uuid}
+        debug
       end
     end
     
