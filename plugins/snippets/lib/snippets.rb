@@ -63,19 +63,16 @@ module Redcar
         if @global.nil?
           newhash = {}
           @snippets.each_pair do |key, value|
-            newvalue = value.select {|s| s[nil, ""].include?(s.scope) }
+            newvalue = value.select {|s| [nil, ""].include?(s.scope) }
             newhash[key] = newvalue if newvalue.count > 0
           end
           @global = newhash
         end
+        @global
       end
       
       def global_with_tab(tab_trigger)
-        if @global.nil?
-          []
-        else
-          [nil, @global[tab_trigger] ]
-        end
+        [nil, global[tab_trigger] ]
       end
       
       def ranked_matching(current_scope, tab_trigger)
